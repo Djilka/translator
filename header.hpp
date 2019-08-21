@@ -85,7 +85,6 @@ class t_metadata_val : public t_metadata_base {
 public:
 	t_metadata_val()
 	{
-		cout << "fff!\n";
 		tm = tm_val;
 	}
 	string type;
@@ -202,6 +201,11 @@ public:
 		return str.find("std::unique_ptr") == 0;
 	}
 
+	bool is_optional(string str)
+	{
+		return str.find("std::optional") == 0;
+	}
+
 	bool is_type_ref(string str)
 	{
 		return str.find("&") != string::npos;
@@ -217,8 +221,8 @@ public:
 		string t;
 		int index = str.find("&");
 		if (index != string::npos)
-			t = string(str, 0, index);
-		return t;
+			return string(str, 0, index);
+		return str;
 	}
 
 	string get_type_ptr(string str)
@@ -226,20 +230,42 @@ public:
 		string t;
 		int index = str.find("*");
 		if (index != string::npos)
-			t = string(str, 0, index);
-		return t;
+			return string(str, 0, index);
+		return str;
 	}
 
 	string get_type_std_ptr(string str)
 	{
 		string t;
 		int index = str.find("<");
-		index = index == string::npos ? str.size() : index;
+		index = index == string::npos ? str.size() : index + 1;
 		for (; index < str.size(); index++) {
 			if (str[index] == '>')
 				break;
 			t += str[index];
 		}
 		return t;
+	}
+
+	string get_type_temp(string str)
+	{
+		string t;
+		int index = str.find("<");
+		index = index == string::npos ? str.size() : index + 1;
+		for (; index < str.size(); index++) {
+			if (str[index] == '>')
+				break;
+			t += str[index];
+		}
+		return t;
+	}
+
+	bool is_type_temp(string str)
+	{
+		int idx_b = str.find("<");
+		int idx_e = str.find(">");
+		return  idx_b != string::npos 
+				&& idx_e != string::npos
+				&& idx_b < idx_e;
 	}
 };

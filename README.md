@@ -1,1 +1,1 @@
-# translator
+# translator cpp to jni

@@ -1,14 +1,42 @@
+#pragma once
+#include "info.hpp"
 
 class t_parser {
+	t_info info;
 private:
-	t_rule *rule;
+	vector<string> split(string str)
+	{
+		vector<string> res;
+		int ps = 0, pc = 0;
+		int count = 0;
+		while (pc < str.size()) {
+			if (str[pc] == '<' || str[pc] == '>') {
+				count += str[pc] == '<' ? 1 : -1;
+			} else if (!count) {
+				if (str[pc] == ':' && pc + 1 < str.size() && str[pc+1] == ':') {
+					pc += 2;
+					continue;
+				}
+				string s(str, pc, 1);
+				if (!isalnum(str[pc]) && info.is_sep(s)) {
+					if (ps != pc)
+						res.push_back(string(str, ps, pc - ps));
+					res.push_back(s);
+					ps = pc + 1;
+				}
+			}
+			pc++;
+		}
+		if (ps != pc)
+			res.push_back(string(str, ps, pc - ps + 1));
+		return res;
+	}
 
 	vector<string> read(string name)
 	{
 		vector<string> v;
 		ifstream stream(name);
 		string tmp;
-		cout << "t_parser::read\n";
 
 		while (stream.good()) {
 			tmp.clear();
@@ -21,7 +49,7 @@ private:
 			if (tmp.size() == 1)
 				v.push_back(tmp);
 			else if (tmp.size()) {
-				vector<string> v_tmp = rule->split(tmp);
+				vector<string> v_tmp = split(tmp);
 				v.insert(v.end(), v_tmp.begin(), v_tmp.end());
 			}
 		}
@@ -30,49 +58,10 @@ private:
 		return v;
 	}
 public:
-	t_parser(type_code type)
+	vector<string> run(string name)
 	{
-		rule = t_rule_factory::create(type);
+		return read(name);
 	}
 
-	~t_parser()
-	{
-		delete rule;
-	}
-
-	bool is_OK()
-	{
-		return rule != nullptr;
-	}
-
-	void meta(vector<string> v)
-	{
-		cout << "vector:\n";
-		for (string t : v)
-			cout << "v_tmp = " << t << "\n";
-		cout << "\n";
-
-		int i = 0, tmp = 0;
-		while (i < v.size()) {
-			cout << "metas name class: " << v[i+1] << "\n";
-			if (rule->try_val(v, i) || rule->get_st_size("val")) {
-				cout << "find val\n";
-			} else if (rule->try_fun(v, i) || rule->get_st_size("fun")) {
-				cout << "find fun\n";
-			} else if (rule->try_class(v, i) || rule->get_st_size("class")) {
-				cout << "find class\n";
-			} else {
-				cout << "didn't find type\n";
-				i++;
-			}
-			cout << "\n";
-		}
-	}
-
-	t_rule* run(string name)
-	{
-		cout << "t_parser::run1 name = " << name << "\n";
-		meta(read(name));
-		return rule;
-	}
+	
 };

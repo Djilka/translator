@@ -21,7 +21,7 @@ void CTest4::setCTest2(std::unique_ptr<CTest2>&& test2_) {
 }
 
 void CTest4::fun(CFun&& callback) {
-    if (CTest2 && CTest2->isValid()) {
+    if (test2 && test2->isValid()) {
         callback();
     } else {
         throw std::runtime_error("no valid CTest2 is set");
